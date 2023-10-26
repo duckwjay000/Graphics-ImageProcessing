@@ -223,14 +223,11 @@ def worldToCamera(model):
 					   [math.sin(math.degrees(angle)),0,math.cos(math.degrees(angle)),0],
 					   [0,0,0,1]])
 	for line in model:
-		print(translate.shape)
-		print(line.start)
 		start = np.matmul(translate,line.start)
-		#start = translate @ line.start
-		#start = np.matmul(rotate,start)
-		#end = np.matmul(translate,line.end)
-		#end = np.matmul(rotate,end)
-		#line.append(Line3D(start,end))
+		start = np.matmul(rotate,start)
+		end = np.matmul(translate,line.end)
+		end = np.matmul(rotate,end)
+		list.append(Line3D(start,end))
 	return list
 	
 def clip(model):
@@ -239,7 +236,7 @@ def clip(model):
 	zoom = 1/math.tan(fov/2)
 	f = 1000
 	n = .0001
-	clipMatrix = np.array([zoom, 0, 0, 0], [0, zoom, 0, 0], [0, 0, ((f+n)/(f-n)), (-2*(n*f)/(f-n))], [0, 0, 1, 0])
+	clipMatrix = np.array([[zoom, 0, 0, 0], [0, zoom, 0, 0], [0, 0, ((f+n)/(f-n)), (-2*(n*f)/(f-n))], [0, 0, 1, 0]])
 	##CHECK THIS MATH. IS ZOOM THE SAME? IF NOT, HOW TO SOLVE?
 	for line in model:
 		start = np.matmul(clipMatrix, line.start)
@@ -265,7 +262,7 @@ def clip(model):
 
 def toScreenSpace(model):
 	list = []
-	transformationMatrix = np.array([256, 0, 256], [0, -256, 256], [0, 0, 1])
+	transformationMatrix = np.array([[256, 0, 256], [0, -256, 256], [0, 0, 1]])
 	#np.matmul(transformationMatrix, )
 	for line in model:
 		start = np.matmul(transformationMatrix, line.start)
@@ -277,14 +274,15 @@ def toScreenSpace(model):
 def drawHouse(model):
 	homogeneous = toHomogeneous(model)
 	worldSpace = objectToWorld(homogeneous, houseLocations)
-	cameraSpace = worldToCamera(model)
-	
+	cameraSpace = worldToCamera(worldSpace)
+	clipSpace = clip(cameraSpace)
+	screenSpace = toScreenSpace(clipSpace)
 	
 
 
-	#for s in linelist:
+	for line in screenSpace:
 		#BOGUS DRAWING PARAMETERS SO YOU CAN SEE THE HOUSE WHEN YOU START UP
-	#	pygame.draw.line(screen, BLUE, (20*s.start.x+200, -20*s.start.y+200), (20*s.end.x+200, -20*s.end.y+200))
+		pygame.draw.line(screen, RED, line.start, line.end)
 	
 
 # Initialize the game engine
