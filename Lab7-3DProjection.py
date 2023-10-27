@@ -173,6 +173,11 @@ rotate180Matrix = np.array([[-1,0,0,0],
 
 
 
+tireLocations = np.array([[[1,0,0,0],
+			   [0,1,0,0],
+			   [0,0,1,0],
+			   [0,0,0,1]]])
+
 carLocation = np.array([[[1,0,0,-20],
 						[0,1,0,0],
 						[0,0,1,15],
@@ -289,7 +294,6 @@ def clip(model):
 def toScreenSpace(model):
 	list = []
 	transformationMatrix = np.array([[256, 0, 256], [0, -256, 256], [0, 0, 1]])
-	#np.matmul(transformationMatrix, )
 	for line in model:
 		start = np.matmul(transformationMatrix, line.start)
 		end = np.matmul(transformationMatrix, line.end)
@@ -310,12 +314,27 @@ def drawHouse(model):
 		#BOGUS DRAWING PARAMETERS SO YOU CAN SEE THE HOUSE WHEN YOU START UP
 		pygame.draw.line(screen, RED, line.start, line.end)
 	
-def drawTires(model):
-	test = 0
+def drawTires(model, carLocation, offset):
+	homogeneous = toHomogeneous(model)
+
+	tireLocation = offset @ carLocation
+	
+	worldSpace = objectToWorld(homogeneous, tireLocations)
+	cameraSpace = worldToCamera(worldSpace)
+	clipSpace = clip(cameraSpace)
+	screenSpace = toScreenSpace(clipSpace)
+	return screenSpace
 
 def drawCar(model):
 	homogeneous = toHomogeneous(model)
 	worldSpace = objectToWorld(homogeneous, carLocation)
+	
+	#offset*location*line
+	#offset = car
+	#tires = []
+	for pos in tireLocations:
+		np.append(worldSpace, drawTires(tireLineList, carLocation, pos)
+	
 	cameraSpace = worldToCamera(worldSpace)
 	clipSpace = clip(cameraSpace)
 	screenSpace = toScreenSpace(clipSpace)
