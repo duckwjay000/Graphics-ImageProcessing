@@ -66,6 +66,8 @@ class WireframeViewer(wf.WireframeGroup):
 
                     # Only draw faces that face us
                     if towards_us > 0:
+                        specular = [0.0, 0.0, 0.0]
+                        diffuse = [0.0, 0.0, 0.0]
                         m_ambient = 0.1
                         ambient = self.light_color * (m_ambient * colour)
 
@@ -76,30 +78,22 @@ class WireframeViewer(wf.WireframeGroup):
                         m_diffuse = .55
                         m_specular = .35
                         kgls = 20
+
+                        diffuse = m_diffuse * self.light_color * colour * np.dot(normal, self.light_vector)
+
                         r = 2 * (np.dot(self.light_vector, normal)) * normal - self.light_vector
                         
                         
-                        specular = [0.0, 0.0, 0.0]
-                        diffuse = [0.0, 0.0, 0.0]
-                        if np.dot(normal, self.light_vector) > 0:    
-                            diffuse = m_diffuse * self.light_color * colour * np.dot(normal, self.light_vector)
+
+                        if np.dot(r, self.view_vector) > 0:    
                             specular = m_specular * self.light_color * colour * (np.dot(self.view_vector, r))**kgls
                         
-                        
-
-
-
-
-
-
-
-
-
+                    
 
 						#Once you have implemented diffuse and specular lighting, you will want to include them here
                         light_total = ambient + diffuse + specular
                         light_total[light_total < 0] = 0
-                        light_total[light_total > 255] = 0
+                        light_total[light_total > 255] = 255
 
                         pygame.draw.polygon(self.screen, light_total, [(nodes[node][0], nodes[node][1]) for node in face], 0)
 
@@ -147,16 +141,6 @@ class WireframeViewer(wf.WireframeGroup):
         if key == pygame.K_e:
             toRotate = np.append(self.light_vector, 1)
             self.light_vector = np.dot(toRotate, wf.rotateZMatrix(-math.degrees(.005)))[:-1]
-
-
-
-
-
-
-
-
-
-
 
         return
 
